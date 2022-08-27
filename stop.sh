@@ -1,0 +1,1 @@
+sudo docker stop node_todo_app  
