@@ -1,5 +1,6 @@
 FROM node:17.0.0
 
+
 WORKDIR /app
 
 COPY ./package.json /app
@@ -11,5 +12,9 @@ COPY . /app
 ## anonymous volume
 VOLUME [ "/app/node_modules" ]
 
-EXPOSE 3000
+## enviorment var
+ARG default_port=3000
+ENV PORT $default_port
+EXPOSE $PORT
+
 CMD ["npm", "start"]
