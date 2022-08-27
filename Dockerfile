@@ -8,5 +8,8 @@ RUN npm install
 
 COPY . /app
 
+## anonymous volume
+VOLUME [ "/app/node_modules" ]
+
 EXPOSE 3000
 CMD ["npm", "start"]

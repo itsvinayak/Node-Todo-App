@@ -23,12 +23,10 @@ const enrichTodos = async () => {
     console.error("unable to load todos ! ", err);
   }
   let todos = raw_todos.split("\n");
-  for(let item of todos){
-    todo.push(item)
+  for (let item of todos) {
+    todo.push(item);
   }
 };
-
-
 
 const printTodo = () => {
   let todo_html = [];
