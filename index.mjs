@@ -1,25 +1,25 @@
 import express from "express";
-import mongoose from "mongoose";
-
-// setting up db schema
-
-const todoSchema = new mongoose.Schema({
-  task: {
-    type: String,
-    required: true,
-  },
-});
-
-const todoModel = mongoose.model("todo", todoSchema);
+import redis from "redis";
+import { v4 as uuidv4 } from "uuid";
 
 const app = new express();
 
+// redis client
+const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+const client = redis.createClient({ url: redisUrl });
+
+client.connect();
+
+client.on("error", (err) => console.log("Redis Client : ", err));
+client.on("connect", () => console.log("Redis Client Connected"));
+
+// middleware
 app.use(express.urlencoded({ extended: false }));
 
-const printTodo = async () => {
+  const printTodo = async () => {
   let todo_html = [];
-  let todos = await todoModel.find({});
-  todos = todos.map((todo) => todo.task);
+  let todos = await client.hGetAll("todos");
+  todos = Object.values(todos);
   for (let todo of todos) {
     todo_html.push(`<li> ${todo} </li>`);
   }
@@ -44,29 +44,15 @@ app.get("/", async (_req, res) => {
 
 app.post("/create", async (req, res) => {
   try {
-    const todo = new todoModel({
-      task: req.body.todo,
-    });
-    await todo.save();
+    const todo = await client.hSet("todos", uuidv4(), req.body.todo);
   } catch (err) {
     console.error("unable to save todo ", err);
   }
   res.redirect("/");
 });
 
-const DB_URL = process.env.DB_URL;
 const PORT = process.env.PORT || 3000;
 
-console.log(DB_URL);
-mongoose
-  .connect(DB_URL)
-  .then((res) => {
-    console.log("connected to DB");
-    app.listen(PORT, () => {
-      console.log("Server started on port 3000");
-    });
-  })
-  .catch((err) => {
-    console.error("unable to connect to DB ", err);
-    process.exit();
-  });
+app.listen(PORT, () => {
+  console.log("Server started on port 3000");
+});

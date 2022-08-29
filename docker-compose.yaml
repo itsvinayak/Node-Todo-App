@@ -1,0 +1,21 @@
+version: '3.9'
+services:
+  todo-app:
+    container_name: todo-app
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - redis-app
+  redis-app:
+    container_name: redis-app
+    image: redis
+    restart: always
+    volumes:
+      - ./data/redis:/data
+    
